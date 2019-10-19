@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MessageError: LocalizedError, CustomStringConvertible {
+internal struct MessageError: LocalizedError, CustomStringConvertible {
     public var message: String
     
     public init(_ message: String) {

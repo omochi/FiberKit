@@ -2,7 +2,7 @@ import Foundation
 
 public final class Fiber<T, U> {
     public typealias Yield = (U) -> T
-    public typealias BodyFunc = (Yield, T) -> U
+    public typealias BodyFunc = (@escaping Yield, T) -> U
     private let queue = DispatchQueue(label: "Fiber.queue")
     private let executionQueue = DispatchQueue(label: "Fiber.executionQueue")
     private var paramSemaphore: DispatchSemaphore
@@ -67,7 +67,11 @@ public final class Fiber<T, U> {
     private func run(param: T) {
         dispatchPrecondition(condition: .onQueue(executionQueue))
         
+        executionQueue.setSpecific(key: Fibers.currentKey, value: self)
+        
         let result = body(_yield, param)
+        
+        executionQueue.setSpecific(key: Fibers.currentKey, value: nil)
         
         queue.sync {
             precondition(isWaiting)
